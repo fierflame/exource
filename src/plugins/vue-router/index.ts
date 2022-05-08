@@ -30,19 +30,20 @@ export default async function router(api: Api, {
 	lazy,
 	base,
 	baseScript,
+	componentProps,
 }: {
 	lazy?: boolean;
 	base?: string;
 	baseScript?: string;
+	componentProps?: string | string[];
 }) {
-	if (base) {
-		baseScript = JSON.stringify(base);
-	}
+	if (base) { baseScript = JSON.stringify(base); }
 	const update = ignoreFn(async (list: Route[]) => {
 		const components= new Map<string, string>();
 		const importCodes: string[] = ["import { defineAsyncComponent } from 'vue'"];
 		function getComponentCode(path: string) {
-			const importPathText = JSON.stringify(api.relativePath('vue-router', path, true));
+			const importPath = path[0] === '.' ? api.relativePath('vue-router', path, true) : path;
+			const importPathText = JSON.stringify(importPath);
 			if (lazy) { return `() => import(${importPathText})`}
 			let name = components.get(path);
 			if (name) { return name;}
@@ -51,7 +52,7 @@ export default async function router(api: Api, {
 			importCodes.push(`import ${name} from ${importPathText}`)
 			return name;
 		}
-		const code = transform(list, getComponentCode);
+		const code = transform(list, getComponentCode, componentProps);
 		await api.write('vue-router/routes.js', [
 			...importCodes,
 			`export default ${code}`
@@ -61,7 +62,7 @@ export default async function router(api: Api, {
 	await api.write('vue-router/routes.js', 'export default []');
 	await api.write('vue-router/index.d.ts', indexType);
 	await api.write('vue-router/index.js', createIndex(baseScript));
-	api.setImport({'./vue-router': 'router'});
+	api.setImport({'./vue-router': 'vueRouter'});
 	api.listen('routes', true, data => {
 		if (!data) { return; }
 		update(data);
