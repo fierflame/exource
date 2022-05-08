@@ -37,18 +37,40 @@ function getHandlers(
 	const list = Array.isArray(v) ? v : Object.entries(v);
 	return list.map(h => getHandler(h)).filter(Boolean) as [Handler, Record<string, any>][];
 }
+function getImports(
+	value?: string[] | Record<string, boolean>
+) {
+	const imports: Record<string, boolean> = {};
+	if (!value) { return imports}
+	if (typeof value !== 'object') { return imports; }
+	if (Array.isArray(value)) {
+		for (const n of value) {
+			if (!n || typeof value !== 'string') { continue; }
+			imports[n] = false;
+		}
+		return imports;
+	}
+	for (const [p, v] of Object.entries(value)) {
+		if (!p) { continue; }
+		if (typeof v === 'boolean') { imports[p] = v; }
+	}
+	return imports;
+}
 export default async function routes(api: Api, {
 	e404,
 	main = 'main',
 	path,
 	handlers: handlerList,
+	imports: importList,
 }: {
 	path?: string | string[];
 	e404?: string;
 	main?: string;
-	handlers?: string | Handler | (string | Handler | [string | Handler, any])[] | Record<string, any>
+	handlers?: string | Handler | (string | Handler | [string | Handler, any])[] | Record<string, any>;
+	imports?: string[] | Record<string, boolean>;
 } = {}) {
 	const handlers = getHandlers(handlerList);
+	const imports = getImports(importList);
 	const filepath = path || `{${api.moduleDir}/*,${api.root}}/routes`
 	let updatedAll = false;
 	api.scanCfg(filepath, ignoreFn((all, path, cfg, merged) => {
@@ -61,7 +83,13 @@ export default async function routes(api: Api, {
 			if (typeof cfg !== 'object') { continue; }
 			routeMap[path] = Array.isArray(cfg) ? {main: cfg} : cfg;
 		}
-		api.emit('routes', merge(routeMap, handlers, main, e404));
+		api.emit('routes', merge(
+			routeMap,
+			handlers,
+			main,
+			imports,
+			e404,
+		));
 	}))
 }
 

@@ -42,6 +42,19 @@ function getParentPath(path: string): string {
 	return path;
 }
 
+function getValue(
+	imports: Record<string, boolean>,
+	k: string,
+	value: any,
+	resolvePath: (v: string) => string,
+) {
+	if (!(k in imports)) { return value; }
+	if (!value) { return value; }
+	if (typeof value !== 'string') { return value; }
+	if (imports[k] && !'./'.includes(value[0])) { return value; }
+	return resolvePath(value);
+
+}
 
 function runHandlers(
 	route: Route,
@@ -49,7 +62,8 @@ function runHandlers(
 	filepath: string,
 	handlers: [Handler, Record<string, any>][],
 	names: string[],
-) {
+	imports: Record<string, boolean>,
+): Route {
 	const ignores = new Set<string>();
 	function ignore(...props: string[]) {
 		for(const p of props) { ignores.add(p); }
@@ -59,9 +73,11 @@ function runHandlers(
 		handler(route, {...cfg}, { ignore, resolvePath, names: [...names] }, opt);
 	}
 	ignore('path', 'order', 'children', 'redirect', 'component', 'components');
-	const cc = {...cfg};
-	for (const ig of ignores) { delete cc[ig]; }
-	return { ...cc, ...route } as Route;
+	for (const [key, value] of Object.entries(cfg)) {
+		if (ignores.has(key)) { continue; }
+		route[key] = getValue(imports, key, value, resolvePath);
+	}
+	return route
 
 }
 function isRecursion(it: string | object, all: [string | object, string][]) {
@@ -74,6 +90,7 @@ export default function merge(
 	all: Record<string, Record<string, any[]>>,
 	handlers: [Handler, Record<string, any>][],
 	main: string,
+	imports: Record<string, boolean>,
 	e404?: string,
 ) {
 	function *list(
@@ -160,7 +177,7 @@ export default function merge(
 			route.component = e404;
 			route.components = {default: e404};
 		}
-		return runHandlers(route, cfg, filepath, handlers, names);
+		return runHandlers(route, cfg, filepath, handlers, names, imports);
 	}
 	return getList(main, '', [], []);
 }
