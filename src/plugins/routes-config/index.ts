@@ -11,27 +11,31 @@ export type {
 	RouteMenuCfg, RouteMenu,
 	RouteAuthorityCfg, RouteAuthority,
 } from './types'
+function getHandlerFn(h: any): Handler | null {
+	if (typeof h === 'function') { return h; }
+	if (typeof h !== 'string') { return null; }
+	const handler = h in handlers && handlers[h]
+	return handler || null;
+}
 
-function getHandlers(v?: string | Handler | (string | Handler)[]): Handler[] {
-	const list = new Set<Handler>();
-	if (typeof v === 'string') {
-		const handler = v in handlers && handlers[v]
-		if (handler) { list.add(handler); }
-	} else if (typeof v === 'function') {
-		list.add(v)
-	} else if (Array.isArray(v)) {
-		for (const h of v) {
-			if (typeof h === 'function') {
-				list.add(h)
-				continue;
-			}
-			if (typeof h === 'string') {
-				const handler = h in handlers && handlers[h]
-				if (handler) { list.add(handler); }
-			}
-		}
-	}
-	return [...list];
+function getHandler(
+	v?: string | Handler | [string | Handler, Record<string, any>]
+): [Handler, Record<string, any>] | null{
+	const handler = Array.isArray(v) ? getHandlerFn(v[0]) : getHandlerFn(v);
+	if (!handler) { return null }
+	const opt = Array.isArray(v) && typeof v[1] === 'object' && v[1] || {}
+	return [handler, opt]
+}
+function getHandlers(
+	v?: string | Handler | (string | Handler | [string | Handler, any])[] | Record<string, any>
+): [Handler, Record<string, any>][] {
+	if (!v) { return []}
+	const fn = getHandlerFn(v);
+	if (fn) { return [[fn, {}]] }
+	if (typeof v !== 'object') { return []; }
+	
+	const list = Array.isArray(v) ? v : Object.entries(v);
+	return list.map(h => getHandler(h)).filter(Boolean) as [Handler, Record<string, any>][];
 }
 export default async function routes(api: Api, {
 	e404,
@@ -42,7 +46,7 @@ export default async function routes(api: Api, {
 	path?: string | string[];
 	e404?: string;
 	main?: string;
-	handlers?: string | Handler | (string | Handler)[]
+	handlers?: string | Handler | (string | Handler | [string | Handler, any])[] | Record<string, any>
 } = {}) {
 	const handlers = getHandlers(handlerList);
 	const filepath = path || `{${api.moduleDir}/*,${api.root}}/routes`

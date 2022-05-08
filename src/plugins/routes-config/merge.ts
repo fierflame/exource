@@ -47,15 +47,16 @@ function runHandlers(
 	route: Route,
 	cfg: RouteCfg,
 	filepath: string,
-	handlers: Handler[],
+	handlers: [Handler, Record<string, any>][],
+	names: string[],
 ) {
 	const ignores = new Set<string>();
 	function ignore(...props: string[]) {
 		for(const p of props) { ignores.add(p); }
 	}
 	const resolvePath = getPath.bind(null, filepath);
-	for (const handler of handlers) {
-		handler(route, {...cfg}, { ignore, resolvePath });
+	for (const [handler, opt] of handlers) {
+		handler(route, {...cfg}, { ignore, resolvePath, names: [...names] }, opt);
 	}
 	ignore('path', 'order', 'children', 'redirect', 'component', 'components');
 	const cc = {...cfg};
@@ -71,24 +72,34 @@ function isRecursion(it: string | object, all: [string | object, string][]) {
 
 export default function merge(
 	all: Record<string, Record<string, any[]>>,
-	handlers: Handler[],
+	handlers: [Handler, Record<string, any>][],
 	main: string,
 	e404?: string,
 ) {
-	function *list(name: string, parent: string, names: [string | object, string][]) {
+	function *list(
+		name: string,
+		parent: string,
+		ancestors: [string | object, string][],
+		names: string[],
+	) {
 		for (const [path, map] of Object.entries(all)) {
 			const list = name in map && map[name]
 			if (!Array.isArray(list)) { continue; }
-			const newNames: [string | object, string][] = [...names, [name, path]];
+			const newAncestors: [string | object, string][] = [...ancestors, [name, path]];
 			for (const r of list) {
-				const v = get(r, path, parent, newNames)
+				const v = get(r, path, parent, newAncestors, names)
 				if (v) { yield v; }
 			}
 		}
 	}
-	function getList(name: string, parent: string, names: [string | object, string][]) {
-		if (isRecursion(name, names)) { return []; };
-		return [...list(name, parent, names)].sort(
+	function getList(
+		name: string,
+		parent: string,
+		ancestors: [string | object, string][],
+		names: string[],
+	) {
+		if (isRecursion(name, ancestors)) { return []; };
+		return [...list(name, parent, ancestors, names)].sort(
 			({ order: a }, { order: b }) => (Number(a) || 0) - (Number(b) || 0)
 		)
 	}
@@ -96,11 +107,12 @@ export default function merge(
 		children: RouteCfgList,
 		file: string,
 		parent: string,
-		names: [string | object, string][]
+		ancestors: [string | object, string][],
+		names: string[],
 	): Iterable<Route> {
 		for (const route of children) {
 			if (typeof route === 'string') {
-				yield* getList(route, parent, names);
+				yield* getList(route, parent, ancestors, names);
 				continue;
 			}
 			if (route === 404) {
@@ -108,7 +120,7 @@ export default function merge(
 				continue;
 			}
 			if (typeof route === 'number') { continue; }
-			const v = get(route, file, parent, names);
+			const v = get(route, file, parent, ancestors, names);
 			if (v) { yield v; }
 		}
 	}
@@ -116,21 +128,24 @@ export default function merge(
 		cfg: RouteCfg,
 		filepath: string,
 		parent: string,
-		names: [string | object, string][],
+		ancestors: [string | object, string][],
+		names: string[],
 	): Route | undefined {
-		if (isRecursion(cfg, names)) { return; };
+		if (isRecursion(cfg, ancestors)) { return; };
 
-		const { order, path, children, component, components, redirect } = cfg;
+		const { order, path, children, component, components, redirect, name } = cfg;
 		const route: Route = { order };
 		const routePath = getRoutePath(parent, path); 
 		route.path = routePath
+		route.name = typeof name === 'string' && name || undefined;
 		let hasChildren = false;
 		if (children) {
 			const list= [...getChildren(
 				children,
 				filepath,
 				getParentPath(routePath),
-				[...names, [cfg, filepath]],
+				[...ancestors, [cfg, filepath]],
+				[...names, typeof name === 'string' ? name : ''],
 			)];
 			route.children = list
 			hasChildren = Boolean(list.length);
@@ -145,7 +160,7 @@ export default function merge(
 			route.component = e404;
 			route.components = {default: e404};
 		}
-		return runHandlers(route, cfg, filepath, handlers);
+		return runHandlers(route, cfg, filepath, handlers, names);
 	}
-	return getList(main, '', []);
+	return getList(main, '', [], []);
 }
