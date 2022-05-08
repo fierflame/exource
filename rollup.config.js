@@ -26,9 +26,11 @@ const external = [
 ];
 const extensions = ['.ts'];
 
-fsFn.rmSync('public', { recursive: true })
-fsFn.mkdirSync(`public`, {recursive: true})
-fsFn.writeFileSync(`public/package.json`, JSON.stringify({
+try {
+	fsFn.rmSync('build', { recursive: true })
+} catch{}
+fsFn.mkdirSync(`build`, {recursive: true})
+fsFn.writeFileSync(`build/package.json`, JSON.stringify({
 	name, description, version, engines, dependencies,
 	type: 'module', main: 'index.mjs', bin: 'cli.mjs',
 	author, license, homepage, repository, bugs,
@@ -44,16 +46,16 @@ function createPlugins() {
 }
 function create(name) {
 	const input = `src/plugins/${name}/index.ts`
-	fsFn.mkdirSync(`public/${name}`, {recursive: true})
-	fsFn.writeFileSync(`public/${name}/package.json`, subPackage)
+	fsFn.mkdirSync(`build/${name}`, {recursive: true})
+	fsFn.writeFileSync(`build/${name}/package.json`, subPackage)
 	return [{
 		input,
-		output: { file: `public/${name}/index.mjs`, format: 'esm', banner },
+		output: { file: `build/${name}/index.mjs`, format: 'esm', banner },
 		external,
 		plugins: createPlugins(),
 	}, {
 		input,
-		output: { file: `public/${name}/index.d.ts`, format: 'esm', banner },
+		output: { file: `build/${name}/index.d.ts`, format: 'esm', banner },
 		external,
 		plugins: [ dts() ],
 	}]
@@ -62,17 +64,17 @@ const GlobalName = name.replace(/(?:^|-)([a-z])/g, (_, s) => s.toUpperCase());
 export default [
 	{
 		input: 'src/core/index.ts',
-		output: { file: `public/index.mjs`, format: 'esm', banner },
+		output: { file: `build/index.mjs`, format: 'esm', banner },
 		external,
 		plugins: createPlugins(),
 	}, {
 		input: 'src/core/index.ts',
-		output: { file: 'public/index.d.ts', format: 'esm', banner },
+		output: { file: 'build/index.d.ts', format: 'esm', banner },
 		external,
 		plugins: [ dts() ],
 	}, {
 		input: 'src/cli/index.ts',
-		output: { file: `public/cli.mjs`, format: 'esm', banner: `#!/usr/bin/env node\n${banner}` },
+		output: { file: `build/cli.mjs`, format: 'esm', banner: `#!/usr/bin/env node\n${banner}` },
 		external,
 		plugins: createPlugins(),
 	},

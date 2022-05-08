@@ -3,7 +3,12 @@
   "version": "0.1.1",
   "description": "一款扫描 js 源码并生成辅助代码的工具",
   "scripts": {
-    "build": "rollup -c && cp README.md public && chmod +x public/cli.mjs && mkdir public/node_modules && ln -s .. public/node_modules/exource "
+    "build": "npm run rollup && npm run chmod && npm run ln && npm run cp",
+    "chmod": "chmod +x build/cli.mjs",
+    "ln": "mkdir build/node_modules; ln -s .. build/node_modules/exource",
+    "cp": "cp LICENSE README.* build",
+    "rollup": "rollup -c",
+    "lint": "eslint --fix --ext .ts src"
   },
   "author": "猛火 Fierflame",
   "engines": {
@@ -12,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://gitee.com/fierflame/exource.git"
+    "url": "https://gitee.com/fierflame/exource.git"
   },
   "bugs": {
     "url": "https://gitee.com/fierflame/exource/issues"
