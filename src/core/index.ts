@@ -74,9 +74,12 @@ export default async function exource({
 		outputRoot,
 		emit, listen, get,
 		relativePath(from, to, o) {
-			const f = pathFn.resolve(cwd, outputRoot, from);
-			const t = pathFn.resolve(cwd, o ? '' : outputRoot, to);
-			return pathFn.relative(f, t);
+			const f = pathFn.join('/', outputRoot, from);
+			const t = pathFn.join('/', o ? '' : outputRoot, to);
+			const path = pathFn.relative(f, t);
+			if (!path) { return '.'; }
+			if ('./'.includes(path[0])) { return path }
+			return`./${path}`;
 		},
 		imports, plugins, awaitPlugins,
 		updateIndex: ignoreFn(() => writeIndex(outputRoot, imports)),
