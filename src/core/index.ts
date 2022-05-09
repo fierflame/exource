@@ -7,6 +7,7 @@ import createApi from './createApi';
 import writeIndex from './writeIndex';
 export {default as logger} from './logger';
 import * as fsPromises from 'node:fs/promises';
+import getVersion from './getVersion';
 export type {
 	Api,
 	Logger,
@@ -82,6 +83,7 @@ export default async function exource({
 			if ('./'.includes(path[0])) { return path }
 			return`./${path}`;
 		},
+		getVersion: getVersion.bind(null, cwd),
 		imports, plugins, awaitPlugins,
 		updateIndex: ignoreFn(() => writeIndex(outputRoot, imports)),
 	}

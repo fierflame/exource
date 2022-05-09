@@ -45,6 +45,7 @@ export default function createApi(
 		moduleDir,
 		get, emit, listen,
 		relativePath,
+		getVersion,
 	} = context;
 
 	return {
@@ -53,6 +54,7 @@ export default function createApi(
 		root,
 		moduleDir,
 		relativePath,
+		getVersion,
 
 		setImport(path?: string | string[] | Record<string, boolean | string>) {
 			imports[s] = trans(path)

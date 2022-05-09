@@ -36,6 +36,8 @@ export interface Api {
 	plugin(id: string, wait?: false): boolean;
 	plugin<T extends Record<string, any>>(plugin: Plugin<T>, cfg?: Partial<T>): boolean;
 
+	getVersion(pkg: string): Promise<string>;
+
 	relativePath(from: string, to: string, toCwd?: boolean): string;
 
 	emit(name: string | symbol, value: any): void

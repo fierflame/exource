@@ -16,4 +16,5 @@ export interface Context {
 	listen(pluginId: string, name: string, get: true, listener: (data: any) => any): () => void
 	listen(pluginId: string, name: string, listener: (data: any) => any): () => void
 	relativePath(from: string, to: string, fromOutput?: boolean): string;
+	getVersion(pkg: string): Promise<string>;
 }
