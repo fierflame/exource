@@ -3,9 +3,9 @@ import * as pathFn from 'node:path/posix'
 
 function getPath(file: string, path: string) {
 	if (path && path[0] === '/') {
-		return pathFn.join(path).substring(1);
+		return `.${pathFn.join(path)}`;
 	}
-	return pathFn.join('/', file, '..', path).substring(1);
+	return `.${pathFn.join('/', file, '..', path)}`;
 }
 function getComponents(
 	file: string,
