@@ -11,6 +11,11 @@ function addSpace(text: string, n: number, begin?: boolean) {
 	const [b, ...t] = String(text).split('\n');
 	return [b, ...t.map(v =>`${space(n)}${v}`)].join('\n');
 }
+function getRedirect(redirect: any) {
+	if (typeof redirect !== 'string') { return JSON.stringify(redirect); }
+	if(!/\\.|:[a-zA-Z_][a-zA-Z_0-9]*/.test(redirect)) { return JSON.stringify(redirect); }
+	return `({params}) => ${JSON.stringify(redirect)}.replace(/\\\\(.)|:([a-zA-Z_][a-zA-Z_0-9]*)/g, (_, s, k) => s || (k in params ? params[k] : \`:\${k}\`))`
+}
 export default function transform(
 	list: Route[],
 	getComponentCode:(path: string) => string,
@@ -36,7 +41,7 @@ export default function transform(
 		}
 	
 		if (redirect) {
-			yield `${space(deep)}redirect: ${JSON.stringify(redirect)},`
+			yield `${space(deep)}redirect: ${getRedirect(redirect)},`
 		}
 	
 		const childDeep = deep + 1;
