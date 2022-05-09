@@ -1,6 +1,6 @@
 import * as fsPromises from 'node:fs/promises';
 import * as pathFn from 'node:path';
-import logger from './logger';
+import logger from '../logger';
 export default async function remove(
 	outputRoot: string,
 	plugin: string,

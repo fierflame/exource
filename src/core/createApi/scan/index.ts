@@ -1,4 +1,4 @@
-import type { ScanCallback, ScanOptions } from '../types';
+import type { ScanCallback, ScanOptions } from '../../types';
 import get from './get';
 import mainScan from './mainScan';
 

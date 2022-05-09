@@ -1,6 +1,6 @@
 import * as chokidar from 'chokidar';
-import type { ScanCfgCallback, ScanCfgOptions } from '../types';
-import { ignoreMapFn } from '../utils';
+import type { ScanCfgCallback, ScanCfgOptions } from '../../types';
+import { ignoreMapFn } from '../../utils';
 import readCfg from '../readCfg';
 
 export default function mainScan(

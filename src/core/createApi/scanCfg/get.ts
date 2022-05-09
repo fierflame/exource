@@ -1,6 +1,6 @@
 import glob from 'fast-glob';
 import readCfg from '../readCfg';
-import { ScanCfgOptions } from '../types';
+import { ScanCfgOptions } from '../../types';
 
 async function readAllCfg(
 	cwd: string,

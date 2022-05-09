@@ -1,5 +1,5 @@
 
-import type { Plugin } from './types';
+import type { Plugin } from '../types';
 
 export interface Context {
 	cwd: string;

@@ -1,6 +1,6 @@
-import type { Plugin } from './types';
+import type { Plugin } from '../types';
 import type { Context } from './Context';
-import createApi from './createApi';
+import createApi from '.';
 
 
 function pluginApi(context: Context, id: string, wait?: false): boolean;

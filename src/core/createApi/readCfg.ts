@@ -2,7 +2,7 @@ import * as fsPromise from 'node:fs/promises'
 import * as pathFn from 'node:path'
 import * as json5 from 'json5'
 import * as yaml from 'yaml'
-import logger from './logger';
+import logger from '../logger';
 export default async function readCfg(
 	cwd: string,
 	plugin: string,

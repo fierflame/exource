@@ -2,7 +2,7 @@ import ignoreFn from './utils/ignoreFn';
 export * from './utils';
 import * as pathFn from 'node:path/posix'
 import type { Plugin, Options } from './types';
-import type { Context } from './Context';
+import type { Context } from './createApi';
 import createApi from './createApi';
 import writeIndex from './writeIndex';
 export {default as logger} from './logger';

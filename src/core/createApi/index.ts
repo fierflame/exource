@@ -1,13 +1,16 @@
-import write from './write';
+import type { Api } from '../types';
+import write from '../write';
+import logger from '../logger';
+
 import scan from './scan';
 import readCfg from './readCfg';
-import logger from './logger';
-import type { Api } from './types';
 import type { Context } from './Context';
 import pluginApi from './pluginApi';
 import remove from './remove';
 import read from './read';
 import scanCfg from './scanCfg';
+
+export type { Context } from './Context';
 
 function trans(path?: string | string[] | Record<string, boolean | string>) {
 	const paths: Record<string, boolean | string> = {};

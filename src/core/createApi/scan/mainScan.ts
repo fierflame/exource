@@ -1,5 +1,5 @@
 import * as chokidar from 'chokidar';
-import type { ScanCallback, ScanOptions } from '../types';
+import type { ScanCallback, ScanOptions } from '../../types';
 
 
 
