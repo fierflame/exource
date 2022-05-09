@@ -17,6 +17,7 @@ export type {
 	Options,
 	Config,
 	ScanCfgCallback,
+	ScanCfgOptions,
 } from './types';
 
 function initDataChannel() {

@@ -27,8 +27,9 @@ export interface Api {
 	scan(path: string | string[], cb: ScanCallback): () => void;
 	scan(path: string | string[]): Promise<string[]>;
 
+	scanCfg(path: string | string[], opt: ScanCfgOptions, cb: ScanCfgCallback): () => void;
 	scanCfg(path: string | string[], cb: ScanCfgCallback): () => void;
-	scanCfg(path: string | string[]): Promise<Record<string, any>>;
+	scanCfg(path: string | string[], opt?: ScanCfgOptions): Promise<Record<string, any>>;
 
 	logger: ApiLogger;
 	plugin(id: string, wait: true): Promise<void>;
@@ -48,6 +49,9 @@ export interface ScanOptions {
 }
 export interface ScanCallback {
 	(paths: string[], path: string, unlink?: boolean, merge?: boolean): any;
+}
+export interface ScanCfgOptions {
+	handle?(v: any, path: string): any
 }
 export interface ScanCfgCallback {
 	(paths: Record<string, any>, path: string, cfg: any, merge?: boolean): any;
