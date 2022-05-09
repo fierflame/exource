@@ -76,8 +76,8 @@ export default async function exource({
 		outputRoot,
 		emit, listen, get,
 		relativePath(from, to, o) {
-			const f = pathFn.join('/', outputRoot, from);
-			const t = pathFn.join('/', o ? '' : outputRoot, to);
+			const f = pathFn.join('/', output, from);
+			const t = pathFn.join('/', o ? '' : output, to);
 			const path = pathFn.relative(f, t);
 			if (!path) { return '.'; }
 			if ('./'.includes(path[0])) { return path }
