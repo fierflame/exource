@@ -88,7 +88,7 @@ export default async function routes(api: Api, {
 			handlers,
 			main,
 			imports,
-			e404,
+			e404 && typeof e404 === 'string' ? './'.includes(e404[0]) ? e404 :`./${e404}` : undefined,
 		));
 	}))
 }
