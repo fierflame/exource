@@ -8,6 +8,7 @@ export interface ApiLogger extends Logger {
 	tag(t: string): Logger
 }
 export interface Api {
+	version: string;
 	cwd: string;
 	root: string;
 	watch: boolean;

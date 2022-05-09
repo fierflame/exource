@@ -93,3 +93,4 @@ export default async function exource({
 	}
 	return createApi(context, 'exource');
 };
+exource.version = '__VERSION__';

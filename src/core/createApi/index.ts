@@ -30,7 +30,7 @@ function trans(path?: string | string[] | Record<string, boolean | string>) {
 	return paths;
 	
 }
-
+const version = '__VERSION__';
 export default function createApi(
 	context: Context,
 	pluginId: string = '',
@@ -58,6 +58,7 @@ export default function createApi(
 		moduleDir,
 		relativePath,
 		getVersion,
+		version,
 
 		setImport(path?: string | string[] | Record<string, boolean | string>) {
 			imports[s] = trans(path)
