@@ -2,6 +2,7 @@
 import type { Api } from 'exource';
 import { ignoreFn } from 'exource'
 import { Route } from '../routes-config/types';
+import getComponentProps from './getComponentProps';
 import transform from './transform';
 const indexType = `\
 import { Router } from 'vue-router';
@@ -26,20 +27,27 @@ const router = createRouter({
 export default router;
 `;
 }
+
+function getDefaultPath(version: string): string {
+	return parseInt(String(version)) < 4 ? '*' : ':_(.*)';
+}
 export default async function router(api: Api, {
 	lazy,
 	base,
 	baseScript,
 	componentProps,
+	allMatchPath,
 }: {
 	lazy?: boolean;
 	base?: string;
 	baseScript?: string;
 	componentProps?: string | string[];
+	allMatchPath?: string;
 }) {
 	if (base) { baseScript = JSON.stringify(base); }
 	const update = ignoreFn(async (list: Route[]) => {
 		const components= new Map<string, string>();
+		const matchPath = allMatchPath || getDefaultPath(await api.getVersion('vue-router'))
 		const importCodes: string[] = ["import { defineAsyncComponent } from 'vue'"];
 		function getComponentCode(path: string) {
 			const importPath = path[0] === '.' ? api.relativePath('vue-router', path, true) : path;
@@ -52,7 +60,7 @@ export default async function router(api: Api, {
 			importCodes.push(`import ${name} from ${importPathText}`)
 			return name;
 		}
-		const code = transform(list, getComponentCode, componentProps);
+		const code = transform(list, getComponentCode, matchPath, getComponentProps(componentProps));
 		await api.write('vue-router/routes.js', [
 			...importCodes,
 			`export default ${code}`
