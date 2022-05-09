@@ -6,9 +6,9 @@ function space(n: number) {
 }
 function addSpace(text: string, n: number, begin?: boolean) {
 	if (begin) {
-		return text.split('\n').map(v =>`${space(n)}${v}`).join('\n');
+		return String(text).split('\n').map(v =>`${space(n)}${v}`).join('\n');
 	}
-	const [b, ...t] = text.split('\n');
+	const [b, ...t] = String(text).split('\n');
 	return [b, ...t.map(v =>`${space(n)}${v}`)].join('\n');
 }
 export default function transform(
