@@ -11,11 +11,6 @@ function addSpace(text: string, n: number, begin?: boolean) {
 	const [b, ...t] = String(text).split('\n');
 	return [b, ...t.map(v =>`${space(n)}${v}`)].join('\n');
 }
-function getRedirect(redirect: any) {
-	if (typeof redirect !== 'string') { return JSON.stringify(redirect); }
-	if(!/\\.|:[a-zA-Z_][a-zA-Z_0-9]*/.test(redirect)) { return JSON.stringify(redirect); }
-	return `({params}) => ${JSON.stringify(redirect)}.replace(/\\\\(.)|:([a-zA-Z_][a-zA-Z_0-9]*)/g, (_, s, k) => s || (k in params ? params[k] : \`:\${k}\`))`
-}
 export default function transform(
 	list: Route[],
 	getComponentCode:(path: string) => string,
@@ -41,18 +36,19 @@ export default function transform(
 		}
 	
 		if (redirect) {
-			yield `${space(deep)}redirect: ${getRedirect(redirect)},`
+			yield `${space(deep)}redirect: createRedirect(${JSON.stringify(String(redirect))}),`
 		}
 	
 		const childDeep = deep + 1;
 	
-		if (components) {
-			yield `${space(deep)}components: {`
-			for (const [name, component] of Object.entries(components)) {
-				yield `${space(childDeep)}${JSON.stringify(name)}: ${getComponentCode(component)},`
-			}
-			yield `${space(deep)}},`
+		yield `${space(deep)}components: {`
+		if (!components || !('default' in components)) {
+			yield `${space(childDeep)}default: RouterView,`
 		}
+		for (const [name, component] of Object.entries(components || {})) {
+			yield `${space(childDeep)}${JSON.stringify(name)}: ${getComponentCode(component)},`
+		}
+		yield `${space(deep)}},`
 	
 		yield `${space(deep)}meta: {`
 		for(const [name, value] of Object.entries(meta)) {
@@ -73,7 +69,7 @@ export default function transform(
 	) {
 		if (!list) { return; }
 		if (!list.length) {
-			yield children ? `${space(deep)}children: [],` : `${space(deep)}[],`;
+			yield children ? `${space(deep)}children: [],` : `${space(deep)}[]`;
 			return;
 		}
 		const childDeep = deep + 1;
