@@ -103,10 +103,7 @@ export default function merge(
 			const list = name in map && map[name]
 			if (!Array.isArray(list)) { continue; }
 			const newAncestors: [string | object, string][] = [...ancestors, [name, path]];
-			for (const r of list) {
-				const v = get(r, path, parent, newAncestors, names)
-				if (v) { yield v; }
-			}
+			yield*getChildren(list, path, parent, newAncestors, names)
 		}
 	}
 	function getList(
@@ -133,7 +130,13 @@ export default function merge(
 				continue;
 			}
 			if (route === 404) {
-				if (e404) { yield { component: e404, components: {default: e404} }; }
+				if (e404) {
+					yield {
+						component: e404,
+						components: {default: e404},
+						order: Number.MAX_VALUE
+					};
+				}
 				continue;
 			}
 			if (typeof route === 'number') { continue; }
