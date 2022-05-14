@@ -3,11 +3,12 @@
   "version": "0.1.7",
   "description": "一款扫描 js 源码并生成辅助代码的工具",
   "scripts": {
-    "build": "npm run rollup && npm run chmod && npm run ln && npm run cp",
+    "build": "npm run mkdir && npm run rollup && npm run chmod && npm run ln && npm run cp",
+    "mkdir": "rm build -rf && mkdir build",
+    "rollup": "rollup -c",
     "chmod": "chmod +x build/cli.mjs",
     "ln": "mkdir build/node_modules; ln -s .. build/node_modules/exource",
     "cp": "cp LICENSE README.* build",
-    "rollup": "rollup -c",
     "lint": "eslint --fix --ext .ts src"
   },
   "author": "猛火 Fierflame",

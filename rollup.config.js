@@ -8,6 +8,9 @@ const {
 	name, description, version, engines, dependencies,
 	author, license, homepage, repository, bugs,
 } = info;
+
+const plugins = ['register', 'routes-config', 'vue-router', 'vue-i18n'];
+
 const beginYear = 2022;
 const year = new Date().getFullYear();
 
@@ -21,20 +24,18 @@ const banner = `\
 
 const external = [
 	name,
+	...plugins.map(p => `${name}/${p}}`),
 	'node:fs/promises', 'node:path/posix', 'node:path',
 	...Object.keys(dependencies),
 ];
 const extensions = ['.ts'];
 
-try {
-	fsFn.rmSync('build', { recursive: true })
-} catch{}
-fsFn.mkdirSync(`build`, {recursive: true})
 fsFn.writeFileSync(`build/package.json`, JSON.stringify({
 	name, description, version, engines, dependencies,
 	type: 'module', main: 'index.mjs', bin: 'cli.mjs',
 	author, license, homepage, repository, bugs,
 }, null, 2))
+
 
 const subPackage = JSON.stringify({main: 'index.mjs', type: 'module'}, null, 2);
 function createPlugins() {
@@ -60,7 +61,6 @@ function create(name) {
 		plugins: [ dts() ],
 	}]
 }
-const GlobalName = name.replace(/(?:^|-)([a-z])/g, (_, s) => s.toUpperCase());
 export default [
 	{
 		input: 'src/core/index.ts',
@@ -78,8 +78,5 @@ export default [
 		external,
 		plugins: createPlugins(),
 	},
-	...create('register'),
-	...create('routes-config'),
-	...create('vue-router'),
-	...create('vue-i18n'),
+	...plugins.map(v => create(v)).flat(),
 ];
