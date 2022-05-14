@@ -1,4 +1,5 @@
 import { Route } from '../routes-config/types';
+import { ComponentPropConfig } from './types';
 
 function space(n: number) {
 	if (!n) { return ''; }
@@ -20,11 +21,13 @@ function getPath(
 	if (path && path[0] === '/') { return path; }
 	return `${parentPath.replace(/\/+$/, '')}/${(path || allMatchPath).replace(/^\/+/, '')}`
 }
+
 export default function transform(
 	list: Route[],
-	getComponentCode:(path: string, isCustomize?: boolean) => string,
+	getComponentCode:(path: string) => string,
+	getPropsComponentCode:(path: string, prop: ComponentPropConfig | boolean) => string,
 	allMatchPath: string,
-	componentProps: Set<string>,
+	componentProps: Record<string, boolean | ComponentPropConfig>,
 ) {
 	
 
@@ -65,8 +68,8 @@ export default function transform(
 	
 		yield `${space(deep)}meta: {`
 		for(const [name, value] of Object.entries(meta)) {
-			if (componentProps.has(name) && value && typeof value === 'string') {
-				yield `${space(childDeep)}${JSON.stringify(name)}: ${getComponentCode(value, true)},`
+			if (name in componentProps && value && typeof value === 'string') {
+				yield `${space(childDeep)}${JSON.stringify(name)}: ${getPropsComponentCode(value, componentProps[name])},`
 			} else {
 				yield `${space(childDeep)}${JSON.stringify(name)}: ${addSpace(JSON.stringify(value, null, '\t'), childDeep)},`
 			}
