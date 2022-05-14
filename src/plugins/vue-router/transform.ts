@@ -11,6 +11,15 @@ function addSpace(text: string, n: number, begin?: boolean) {
 	const [b, ...t] = String(text).split('\n');
 	return [b, ...t.map(v =>`${space(n)}${v}`)].join('\n');
 }
+
+function getPath(
+	parentPath: string,
+	allMatchPath: string,
+	path?: string,
+) {
+	if (path && path[0] === '/') { return path; }
+	return `${parentPath.replace(/\/+$/, '')}/${(path || allMatchPath).replace(/^\/+/, '')}`
+}
 export default function transform(
 	list: Route[],
 	getComponentCode:(path: string) => string,
@@ -19,20 +28,24 @@ export default function transform(
 ) {
 	
 
-	function *transformItem({
-		path,
-		children,
-		components,
-		component,
-		redirect,
-		name,
-		...meta
-	}: Route,
-	deep: number,
+	function *transformItem(
+		parentPath: string, 
+		{
+			path,
+			children,
+			components,
+			component,
+			redirect,
+			name,
+			...meta
+		}: Route,
+		deep: number,
+		names: string[],
 	): Iterable<string> {
-		yield `${space(deep)}path: ${JSON.stringify(path || allMatchPath)},`
+		const thisPath = getPath(parentPath, allMatchPath, path)
+		yield `${space(deep)}path: ${JSON.stringify(thisPath)},`
 		if (name) {
-			yield `${space(deep)}name: ${JSON.stringify(name)},`
+			yield `${space(deep)}name: ${JSON.stringify([...names, name].filter(Boolean).join('.'))},`
 		}
 	
 		if (redirect) {
@@ -60,11 +73,13 @@ export default function transform(
 		}
 		yield `${space(deep)}},`
 	
-		yield *transformList(children, deep, true);
+		yield *transformList(children, thisPath, deep, [...names, name || ''], true);
 	}
 	function *transformList(
 		list: Route[] | undefined,
+		path: string,
 		deep: number,
+		names: string[],
 		children?: boolean,
 	) {
 		if (!list) { return; }
@@ -76,10 +91,10 @@ export default function transform(
 		yield children ? `${space(deep)}children: [{`: `[{`;
 		for (let i = 0; i< list.length;i++) {
 			if (i) { yield `${space(deep)}}, {` }
-			yield * transformItem(list[i], childDeep);
+			yield * transformItem(path, list[i], childDeep, names);
 		}
 		yield children ? `${space(deep)}}],` : `${space(deep)}}]`;
 	
 	}
-	return [...transformList(list, 0)].join('\n');
+	return [...transformList(list, '/', 0, [])].join('\n');
 }
