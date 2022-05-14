@@ -3,7 +3,7 @@ import type { Api } from 'exource';
 import { ignoreFn } from 'exource'
 import getComponentProps from './getComponentProps';
 import type { Options } from './types'
-import type { Route } from '../routes-config/types';
+import type { Route } from 'exource/routes-config';
 import transform from './transform';
 export type { Options, ComponentPropConfig } from './types'
 

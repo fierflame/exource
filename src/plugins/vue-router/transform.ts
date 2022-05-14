@@ -1,4 +1,4 @@
-import { Route } from '../routes-config/types';
+import { Route } from 'exource/routes-config';
 import createRedirectCode from './createRedirectCode';
 import { ComponentPropConfig } from './types';
 
@@ -92,15 +92,7 @@ export default function transform(
 
 	function *transformItem(
 		parentPath: string, 
-		{
-			path,
-			children,
-			components,
-			component,
-			redirect,
-			name,
-			...meta
-		}: Route,
+		{path, children, components, component, redirect, name, ...meta}: Route,
 		deep: number,
 		names: string[],
 	): Iterable<string> {
