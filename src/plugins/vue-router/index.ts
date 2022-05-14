@@ -61,22 +61,52 @@ export default async function router(api: Api, {
 	baseScript,
 	componentProps,
 	allMatchPath,
+	delay, timeout, errorComponent, loadingComponent,
 }: {
 	lazy?: boolean;
 	base?: string;
 	baseScript?: string;
 	componentProps?: string | string[];
 	allMatchPath?: string;
+
+	delay?: number,
+	timeout?: number,
+	errorComponent?: string;
+	loadingComponent?: string;
 }) {
-	if (base) { baseScript = JSON.stringify(base); }
 	const update = ignoreFn(async (list: Route[]) => {
 		const components= new Map<string, string>();
 		const matchPath = allMatchPath || getDefaultPath(await api.getVersion('vue-router'))
-		const importCodes: string[] = ["import { defineAsyncComponent } from 'vue'"];
-		function getComponentCode(path: string) {
+		const isVue3 = parseInt(String(await api.getVersion('vue'))) === 3;
+		const importCodes: string[] = [];
+		if (isVue3) { importCodes.push(`import { defineAsyncComponent } from 'vue'`); }
+		importCodes.push(`import { RouterView } from 'vue-router';`)
+		const customizeLazyOptions = [
+			delay ? `delay: ${JSON.stringify(delay)},` : '',
+			timeout ? `timeout: ${JSON.stringify(timeout)},` : '',
+		];
+		if (errorComponent) {
+			const importPath = errorComponent[0] === '.' ? api.relativePath('vue-router', errorComponent, true) : errorComponent;
+			importCodes.push(`import ErrorComponent from ${JSON.stringify(importPath)}`)
+			customizeLazyOptions.push(`${isVue3 ? 'errorComponent' : 'error'}: ErrorComponent,`)
+		}
+		if (loadingComponent) {
+			const importPath = loadingComponent[0] === '.' ? api.relativePath('vue-router', loadingComponent, true) : loadingComponent;
+			importCodes.push(`import LoadingComponent from ${JSON.stringify(importPath)}`)
+			customizeLazyOptions.push(`${isVue3 ? 'loadingComponent' : 'loading'}: LoadingComponent,`)
+		}
+		const customizeLazyOptionsScripts = customizeLazyOptions.filter(Boolean).join('');
+		function getComponentCode(path: string, isCustomize?: boolean) {
 			const importPath = path[0] === '.' ? api.relativePath('vue-router', path, true) : path;
 			const importPathText = JSON.stringify(importPath);
-			if (lazy) { return `() => import(${importPathText})`}
+			if (lazy) {
+				const script = `() => import(${importPathText})`;
+				if (!isCustomize) { return script; }
+				if (isVue3) {
+					return `defineAsyncComponent({loader: ${script}, ${customizeLazyOptionsScripts}})`
+				}
+				return `{component: ${script}, ${customizeLazyOptionsScripts}}`
+			}
 			let name = components.get(path);
 			if (name) { return name;}
 			name = `c${components.size}`;
@@ -86,12 +116,12 @@ export default async function router(api: Api, {
 		}
 		const code = transform(list, getComponentCode, matchPath, getComponentProps(componentProps));
 		await api.write('vue-router/routes.js', [
-			`import { RouterView } from 'vue-router';`,
 			...importCodes,
 			createRedirect,
 			`export default ${code}`
 		].join('\n'));
 	});
+	if (base) { baseScript = JSON.stringify(base); }
 	await api.write('vue-router/routes.d.ts', routesType);
 	await api.write('vue-router/routes.js', 'export default []');
 	await api.write('vue-router/index.d.ts', indexType);

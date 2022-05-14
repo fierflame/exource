@@ -22,7 +22,7 @@ function getPath(
 }
 export default function transform(
 	list: Route[],
-	getComponentCode:(path: string) => string,
+	getComponentCode:(path: string, isCustomize?: boolean) => string,
 	allMatchPath: string,
 	componentProps: Set<string>,
 ) {
@@ -66,7 +66,7 @@ export default function transform(
 		yield `${space(deep)}meta: {`
 		for(const [name, value] of Object.entries(meta)) {
 			if (componentProps.has(name) && value && typeof value === 'string') {
-				yield `${space(childDeep)}${JSON.stringify(name)}: ${getComponentCode(value)},`
+				yield `${space(childDeep)}${JSON.stringify(name)}: ${getComponentCode(value, true)},`
 			} else {
 				yield `${space(childDeep)}${JSON.stringify(name)}: ${addSpace(JSON.stringify(value, null, '\t'), childDeep)},`
 			}
