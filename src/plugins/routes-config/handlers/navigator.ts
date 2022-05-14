@@ -8,6 +8,7 @@ function toLocaleName(v: string) {
 	return n.toLowerCase();
 }
 function localeMap(v: any) {
+	if (v === false) { return false; }
 	if (!v) { return; }
 	if (typeof v !== 'object') { return; }
 	const map = {};
@@ -27,18 +28,21 @@ function getTitle(
 	names: string[],
 	name?: string,
 ): [string, (string | Record<string, string>)?] | void {
+	if (title === false) { return; }
 	if (Array.isArray(title)) {
 		const [t, l] = title;
-		const def = t && typeof t === 'string' ? t : name;
+		const def = typeof t === 'string' && t || name;
 		if (!def) { return; }
 		if (l && typeof l === 'string') { return [def, l]; }
 		const lm = localeMap(l);
+		if (lm === false) { return [def] }
 		if (lm) { return [def, lm]}
 		return name ? [def, ['navigator', ...names, name].filter(Boolean).join('.')] : [def];
 	}
 	if (title && typeof title === 'object') {
 		if (!name) { return; }
 		const lm = localeMap(title);
+		if (lm === false) { return [name] }
 		if (lm) { return [name, lm]}
 		return [name, ['navigator', ...names, name].filter(Boolean).join('.')]
 
@@ -101,10 +105,16 @@ export default function (
 },
 ) {
 	api.ignore('icon', 'title', 'link', 'menu', 'breadcrumb', 'breadcrumbLink');
-	route.menu = getEnum(menuTypes, cfg.menu);
-	route.breadcrumb = getEnum(breadcrumbTypes, cfg.breadcrumb);
-	route.breadcrumbLink = getEnum(breadcrumbLinkTypes, cfg.breadcrumbLink);
-	route.icon = getIcon(api, cfg.icon, iconComponent);
-	route.title = getTitle(cfg.title, api.names, cfg.name);
-	route.link = getLink(cfg.link);
+	const menu = getEnum(menuTypes, cfg.menu);
+	const breadcrumb = getEnum(breadcrumbTypes, cfg.breadcrumb);
+	const breadcrumbLink = getEnum(breadcrumbLinkTypes, cfg.breadcrumbLink);
+	const icon = getIcon(api, cfg.icon, iconComponent);
+	const title = getTitle(cfg.title, api.names, cfg.name);
+	const link = getLink(cfg.link);
+	if (menu !== undefined) { route.menu = menu; }
+	if (breadcrumb !== undefined) { route.breadcrumb = breadcrumb; }
+	if (breadcrumbLink !== undefined) { route.breadcrumbLink = breadcrumbLink; }
+	if (icon !== undefined) { route.icon = icon; }
+	if (title !== undefined) { route.title = title; }
+	if (link !== undefined) { route.link = link; }
 }
