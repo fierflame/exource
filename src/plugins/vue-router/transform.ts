@@ -1,4 +1,5 @@
 import { Route } from '../routes-config/types';
+import createRedirectCode from './createRedirectCode';
 import { ComponentPropConfig } from './types';
 
 function space(n: number) {
@@ -13,7 +14,7 @@ function addSpace(text: string, n: number, begin?: boolean) {
 	return [b, ...t.map(v =>`${space(n)}${v}`)].join('\n');
 }
 
-function getPath(
+function getRoutePath(
 	parentPath: string,
 	allMatchPath: string,
 	path?: string,
@@ -22,14 +23,72 @@ function getPath(
 	return `${parentPath.replace(/\/+$/, '')}/${(path || allMatchPath).replace(/^\/+/, '')}`
 }
 
+
+
+function createComponentImporter(getPath: (path: string)=> string, importCodes: string[]) {
+	const components= new Map<string, string>();
+	return function importComponent(path: string) {
+		const importPath = getPath(path)
+		const importPathText = JSON.stringify(importPath);
+		let name = components.get(path);
+		if (name) { return name;}
+		name = `c${components.size}`;
+		components.set(path, name);
+		importCodes.push(`import ${name} from ${importPathText}`);
+		return name;
+	}
+}
 export default function transform(
+	getPath2: (path: string)=> string,
 	list: Route[],
-	getComponentCode:(path: string) => string,
-	getPropsComponentCode:(path: string, prop: ComponentPropConfig | boolean) => string,
 	allMatchPath: string,
 	componentProps: Record<string, boolean | ComponentPropConfig>,
+	isVue3: boolean,
+	lazy?: boolean,
 ) {
-	
+	let useRedirect = false;
+	let useRouterView = false;
+	let useDefineAsyncComponent = false;
+
+	const importCodes: string[] = [];
+	const importComponent = createComponentImporter(getPath2, importCodes);
+
+	function getVue2PropComponent(path: string, prop: ComponentPropConfig | boolean) {
+		if (!prop) { return importComponent(path); }
+		const script = `() => import(${JSON.stringify(getPath2(path))})`;
+		if (prop === true) { return script }
+		const { delay, timeout, errorComponent, loadingComponent } = prop;
+		return [`{`,
+			`component: ${script},`,
+			delay && `delay: ${JSON.stringify(delay)},`,
+			timeout && `timeout: ${JSON.stringify(timeout)},`,
+			errorComponent && `error: ${importComponent(errorComponent)},`,
+			loadingComponent && `loading: ${importComponent(loadingComponent)},`,
+		`}`].filter(Boolean).join('');
+	}
+	function getVue3PropComponent(path: string, prop: ComponentPropConfig | boolean) {
+		if (!prop) { return importComponent(path); }
+		useDefineAsyncComponent = true;
+		const script = `() => import(${JSON.stringify(getPath2(path))})`;
+		if (prop === true) { return `defineAsyncComponent(${script})`; }
+		const { delay, timeout, errorComponent, loadingComponent } = prop;
+		return [`defineAsyncComponent({`,
+			`loader: ${script},`,
+			delay && `delay: ${JSON.stringify(delay)},`,
+			timeout && `timeout: ${JSON.stringify(timeout)},`,
+			errorComponent && `errorComponent: ${importComponent(errorComponent)},`,
+			loadingComponent && `loadingComponent: ${importComponent(loadingComponent)},`,
+		`})`].filter(Boolean).join('');
+	}
+	const getPropsComponent = isVue3 ? getVue3PropComponent : getVue2PropComponent;
+
+	function getComponentCode(path: string) {
+		if (!lazy) { return importComponent(path); }
+		return `() => import(${JSON.stringify(getPath2(path))})`;
+	}
+
+
+
 
 	function *transformItem(
 		parentPath: string, 
@@ -45,13 +104,14 @@ export default function transform(
 		deep: number,
 		names: string[],
 	): Iterable<string> {
-		const thisPath = getPath(parentPath, allMatchPath, path)
+		const thisPath = getRoutePath(parentPath, allMatchPath, path)
 		yield `${space(deep)}path: ${JSON.stringify(thisPath)},`
 		if (name) {
 			yield `${space(deep)}name: ${JSON.stringify([...names, name].filter(Boolean).join('.'))},`
 		}
 	
 		if (redirect) {
+			useRedirect = true;
 			yield `${space(deep)}redirect: createRedirect(${JSON.stringify(String(redirect))}),`
 		}
 	
@@ -59,6 +119,7 @@ export default function transform(
 	
 		yield `${space(deep)}components: {`
 		if (!components || !('default' in components)) {
+			useRouterView = true;
 			yield `${space(childDeep)}default: RouterView,`
 		}
 		for (const [name, component] of Object.entries(components || {})) {
@@ -69,7 +130,7 @@ export default function transform(
 		yield `${space(deep)}meta: {`
 		for(const [name, value] of Object.entries(meta)) {
 			if (name in componentProps && value && typeof value === 'string') {
-				yield `${space(childDeep)}${JSON.stringify(name)}: ${getPropsComponentCode(value, componentProps[name])},`
+				yield `${space(childDeep)}${JSON.stringify(name)}: ${getPropsComponent(value, componentProps[name])},`
 			} else {
 				yield `${space(childDeep)}${JSON.stringify(name)}: ${addSpace(JSON.stringify(value, null, '\t'), childDeep)},`
 			}
@@ -99,5 +160,15 @@ export default function transform(
 		yield children ? `${space(deep)}}],` : `${space(deep)}}]`;
 	
 	}
-	return [...transformList(list, '/', 0, [])].join('\n');
+	if (useDefineAsyncComponent) { importCodes.push(); }
+
+	const code = [...transformList(list, '/', 0, [])].join('\n');
+	return [
+		useDefineAsyncComponent && `import { defineAsyncComponent } from 'vue';`,
+		useRouterView && `import { RouterView } from 'vue-router';`,
+		...importCodes,
+		useRedirect && createRedirectCode,
+		`export default ${code}`
+	].filter(Boolean).join('\n')
+	
 }

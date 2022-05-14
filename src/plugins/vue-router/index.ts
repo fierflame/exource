@@ -1,9 +1,12 @@
 
 import type { Api } from 'exource';
+import { ignoreFn } from 'exource'
 import getComponentProps from './getComponentProps';
-import writeRoutes from './writeRoutes';
 import type { Options } from './types'
+import type { Route } from '../routes-config/types';
+import transform from './transform';
 export type { Options, ComponentPropConfig } from './types'
+
 
 const routesType = `\
 import { RouteRecordRaw } from 'vue-router';
@@ -31,6 +34,9 @@ export default router;
 }
 
 
+function getDefaultPath(version: string): string {
+	return parseInt(String(version)) < 4 ? '*' : '/:_(.*)';
+}
 export default async function router(api: Api, {
 	base, baseScript,
 	componentProps, allMatchPath, lazy,
@@ -44,7 +50,19 @@ export default async function router(api: Api, {
 	const props = getComponentProps({
 		delay, timeout, errorComponent, loadingComponent,
 	}, componentProps, lazy);
-	writeRoutes(api, props, lazy, allMatchPath);
+	const update = ignoreFn(async (list: Route[]) => {
+		const matchPath = allMatchPath || getDefaultPath(await api.getVersion('vue-router'))
+		const isVue3 = parseInt(String(await api.getVersion('vue'))) === 3;
+		function getPath(path: string) {
+			return path[0] === '.' ? api.relativePath('vue-router', path, true) : path;
+		}
+		const code = transform(getPath, list, matchPath, props, isVue3, lazy);
+		await api.write('vue-router/routes.js', code);
+	});
+	api.listen('routes', true, data => {
+		if (!data) { return; }
+		update(data);
+	})
 }
 router.id = 'exource/vue-router';
 router.tag = 'router';
