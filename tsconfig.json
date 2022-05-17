@@ -15,6 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "exource": ["./src/core"],
+      "exource/locales": ["./src/plugins/locales"],
       "exource/register": ["./src/plugins/register"],
       "exource/routes-config": ["./src/plugins/routes-config"],
       "exource/vue-i18n": ["./src/plugins/vue-i18n"],

@@ -72,6 +72,7 @@ export interface Options {
 	output?: string;
 }
 interface NamedPlugin {
+	'exource/locales': typeof import('exource/locales').default;
 	'exource/register': typeof import('exource/register').default;
 	'exource/routes-config': typeof import('exource/routes-config').default;
 	'exource/vue-i18n': typeof import('exource/vue-i18n').default;
@@ -89,6 +90,7 @@ export interface Config {
 	/** @default `${root}/` */
 	output?: string;
 	plugins?: (
+		| NamedPluginItem<'exource/locales'>
 		| NamedPluginItem<'exource/register'>
 		| NamedPluginItem<'exource/routes-config'>
 		| NamedPluginItem<'exource/vue-i18n'>
