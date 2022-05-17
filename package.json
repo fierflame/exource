@@ -1,6 +1,6 @@
 {
   "name": "exource",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "一款扫描 js 源码并生成辅助代码的工具",
   "scripts": {
     "build": "npm run mkdir && npm run rollup && npm run chmod && npm run ln && npm run cp",
