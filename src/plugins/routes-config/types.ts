@@ -8,7 +8,6 @@ export interface Handler {
 		route: Route,
 		cfg: RouteCfg,
 		api: HandlerApi,
-		opt: Record<string, any>,
 	): void;
 }
 

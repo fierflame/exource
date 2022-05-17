@@ -60,7 +60,7 @@ function runHandlers(
 	route: Route,
 	cfg: RouteCfg,
 	filepath: string,
-	handlers: [Handler, Record<string, any>][],
+	handlers: Handler[],
 	names: string[],
 	imports: Record<string, boolean>,
 ): Route {
@@ -69,8 +69,8 @@ function runHandlers(
 		for(const p of props) { ignores.add(p); }
 	}
 	const resolvePath = getPath.bind(null, filepath);
-	for (const [handler, opt] of handlers) {
-		handler(route, {...cfg}, { ignore, resolvePath, names: [...names] }, opt);
+	for (const handler of handlers) {
+		handler(route, {...cfg}, { ignore, resolvePath, names: [...names] });
 	}
 	ignore('path', 'order', 'children', 'redirect', 'component', 'components');
 	for (const [key, value] of Object.entries(cfg)) {
@@ -88,7 +88,7 @@ function isRecursion(it: string | object, all: [string | object, string][]) {
 
 export default function merge(
 	all: Record<string, Record<string, any[]>>,
-	handlers: [Handler, Record<string, any>][],
+	handlers: Handler[],
 	main: string,
 	imports: Record<string, boolean>,
 	e404?: string,

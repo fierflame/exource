@@ -79,6 +79,8 @@ interface NamedPlugin {
 	'exource/locales': typeof import('exource/locales').default;
 	'exource/register': typeof import('exource/register').default;
 	'exource/routes-config': typeof import('exource/routes-config').default;
+	'exource/routes-config-handler-authority': typeof import('exource/routes-config-handler-authority').default;
+	'exource/routes-config-handler-navigator': typeof import('exource/routes-config-handler-navigator').default;
 	'exource/vue-i18n': typeof import('exource/vue-i18n').default;
 	'exource/vue-router': typeof import('exource/vue-router').default;
 }
@@ -97,6 +99,8 @@ export interface Config {
 		| NamedPluginItem<'exource/locales'>
 		| NamedPluginItem<'exource/register'>
 		| NamedPluginItem<'exource/routes-config'>
+		| NamedPluginItem<'exource/routes-config-handler-authority'>
+		| NamedPluginItem<'exource/routes-config-handler-navigator'>
 		| NamedPluginItem<'exource/vue-i18n'>
 		| NamedPluginItem<'exource/vue-router'>
 		| PluginItem

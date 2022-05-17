@@ -18,6 +18,8 @@
       "exource/locales": ["./src/plugins/locales"],
       "exource/register": ["./src/plugins/register"],
       "exource/routes-config": ["./src/plugins/routes-config"],
+      "exource/routes-config-handler-authority": ["./src/plugins/routes-config-handler-authority"],
+      "exource/routes-config-handler-navigator": ["./src/plugins/routes-config-handler-navigator"],
       "exource/vue-i18n": ["./src/plugins/vue-i18n"],
       "exource/vue-router": ["./src/plugins/vue-router"],
     }

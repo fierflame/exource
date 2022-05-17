@@ -9,7 +9,15 @@ const {
 	author, license, homepage, repository, bugs,
 } = info;
 
-const plugins = ['locales', 'register', 'routes-config', 'vue-router', 'vue-i18n'];
+const plugins = [
+	'locales',
+	'register',
+	'routes-config',
+	'routes-config-handler-authority',
+	'routes-config-handler-navigator',
+	'vue-router',
+	'vue-i18n',
+];
 
 const beginYear = 2022;
 const year = new Date().getFullYear();
