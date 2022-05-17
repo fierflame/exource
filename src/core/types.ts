@@ -20,6 +20,7 @@ export interface Api {
 	read(path: string, encoding?:null | BufferEncoding): Promise<string | Buffer | null>;
 	readCfg(path: string): Promise<Record<string, any>>;
 	setImport(path?: string | string[] | Record<string, false | string>): void;
+
 	scan(
 		path: string | string[],
 		opt: ScanOptions,
@@ -33,6 +34,7 @@ export interface Api {
 	scanCfg(path: string | string[], opt?: ScanCfgOptions): Promise<Record<string, any>>;
 
 	logger: ApiLogger;
+
 	plugin(id: string, wait: true): Promise<void>;
 	plugin(id: string, wait?: false): boolean;
 	plugin<T extends Record<string, any>>(plugin: Plugin<T>, cfg?: Partial<T>): boolean;
@@ -41,10 +43,12 @@ export interface Api {
 
 	relativePath(from: string, to: string, toCwd?: boolean): string;
 
-	emit(name: string | symbol, value: any): void
-	get(name: string): any;
-	listen(name: string, listener: (data: any) => any): () => void
-	listen(name: string, get: true, listener: (data: any) => any): () => void
+	emit<T>(name: string | symbol, value?: T): void
+	get<T>(name: string): T[];
+	listen<T>(name: string, listener: (...data: T[]) => any): () => void
+	listen<T>(name: string, get: true, listener: (...data: T[]) => any): () => void
+
+
 }
 
 export interface ScanOptions {

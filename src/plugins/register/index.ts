@@ -181,7 +181,7 @@ export default async function register(api: Api, {
 			update(register);
 		}
 	})
-	api.listen('localeGetter', true, ignoreFn(v => writeLocale(api, v)));
+	api.listen<string>('localeGetter', true, ignoreFn(v => writeLocale(api, v)));
 	await writeFilter(api);
 	
 	api.scanCfg(joinPath(dirPath, '*'), (all, path, cfg, merged) => {

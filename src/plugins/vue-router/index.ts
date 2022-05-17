@@ -59,9 +59,9 @@ export default async function router(api: Api, {
 		const code = transform(getPath, list, matchPath, props, isVue3, lazy);
 		await api.write('vue-router/routes.js', code);
 	});
-	api.listen('routes', true, data => {
-		if (!data) { return; }
-		update(data);
+	api.listen<Route | Route[]>('routes', true, (...data) => {
+		if (!data.length) { return; }
+		update(data.flat());
 	})
 }
 router.id = 'exource/vue-router';

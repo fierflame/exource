@@ -64,7 +64,7 @@ export default function createApi(
 			imports[s] = trans(path)
 			updateIndex();
 		},
-		get, emit, listen: listen.bind(null, pluginTag) as Api['listen'],
+		get, listen, emit: emit.bind(null, s) as Api['emit'],
 		readCfg: readCfg.bind(null, cwd, pluginTag),
 		read: read.bind(null, cwd, pluginTag) as Api['read'],
 		write: write.bind(null, outputRoot, pluginTag),

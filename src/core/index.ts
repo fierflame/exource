@@ -8,6 +8,7 @@ import writeIndex from './writeIndex';
 export {default as logger} from './logger';
 import * as fsPromises from 'node:fs/promises';
 import getVersion from './getVersion';
+import initDataChannel from './initDataChannel';
 export type {
 	Api,
 	Logger,
@@ -21,40 +22,6 @@ export type {
 	ScanCfgOptions,
 } from './types';
 
-function initDataChannel() {
-	const data: Record<string | symbol, any> = Object.create(null);
-	const listeners: Record<string | symbol, Set<(data: any) => any>> = Object.create(null);
-
-	function emit(name: string | symbol, value: any) {
-		data[name] = value;
-		const set = listeners[name];
-		if (!set) { return; }
-		for (const l of set) {
-			l(value);
-		}
-	}
-	function get(name: string) {
-		return data[name];
-	}
-	function listen(pluginId: string, name: string, get: true, listener: (data: any) => any): () => void
-	function listen(pluginId: string, name: string, listener: (data: any) => any): () => void
-	function listen(
-		pluginId: string,
-		name: string,
-		get: ((data: any) => any) | true,
-		listener?: (data: any) => any
-	): () => void {
-		const f = [get, listener].find(t => typeof t === 'function') as ((data: any) => any | undefined);
-		if (!f) { return () => {}; }
-		function fn(v: any) { f(v) }
-		let set = listeners[name];
-		if (!set) {set = new Set(); listeners[name] = set; }
-		set.add(fn);
-		if (get === true) { fn(data[name]) }
-		return () => { set.delete(fn); }
-	}
-	return {emit, get, listen};
-}
 
 export default async function exource({
 	cwd = process.cwd(),

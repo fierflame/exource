@@ -39,9 +39,9 @@ export default async function vueI18n(api: Api, {
 	api.emit('localeGetter', 'vue-i18n/localeGetter');
 	api.setImport({'./vue-i18n': 'vueI18n'});
 	const writeMessages = ignoreFn(v => api.write('vue-i18n/messages.js', createMessages(v, languages)))
-	api.listen('locales', true, data => {
-		if (!data) { return; }
-		writeMessages(data);
+	api.listen<Record<string, string>>('locales', true, (...data) => {
+		if (!data.length) { return; }
+		writeMessages(Object.assign({}, ...data));
 	})
 }
 vueI18n.id = 'exource/vue-i18n';
