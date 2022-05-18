@@ -1,5 +1,5 @@
 import { cosmiconfig, defaultLoaders } from 'cosmiconfig'
-import * as fsPromise from 'fs/promises';
+import * as fsPromise from 'node:fs/promises';
 import * as JSON5 from 'json5';
 export default async function() {
 	const explorer = cosmiconfig('exource', {

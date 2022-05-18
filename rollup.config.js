@@ -9,16 +9,8 @@ const {
 	author, license, homepage, repository, bugs,
 } = info;
 
-const plugins = [
-	'locales',
-	'register',
-	'routes-config',
-	'routes-config-handler-authority',
-	'routes-config-handler-navigator',
-	'vue-router',
-	'vue-routes',
-	'vue-i18n',
-];
+const plugins = fsFn.readdirSync('src/plugins');
+console.log(plugins)
 
 const beginYear = 2022;
 const year = new Date().getFullYear();
