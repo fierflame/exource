@@ -84,9 +84,10 @@ interface NamedPlugin {
 	'exource/vue-i18n': typeof import('exource/vue-i18n').default;
 	'exource/vue-router': typeof import('exource/vue-router').default;
 }
-export type NamedPluginItem<K extends keyof NamedPlugin> =
-	[K, (NamedPlugin[K] extends Plugin<infer T> ? T : Record<string, any>)?]
-	
+export type NamedPluginItem = {
+	[K in keyof NamedPlugin]: [K, (NamedPlugin[K] extends Plugin<infer T> ? T : Record<string, any>)?]
+}[keyof NamedPlugin];
+
 export type PluginItem<T extends Plugin<any> = Plugin<any>> = 
 	[T, (T extends Plugin<infer P> ? P : Record<string, any>)?]
 export interface Config {
@@ -96,14 +97,10 @@ export interface Config {
 	/** @default `${root}/` */
 	output?: string;
 	plugins?: (
-		| NamedPluginItem<'exource/locales'>
-		| NamedPluginItem<'exource/register'>
-		| NamedPluginItem<'exource/routes-config'>
-		| NamedPluginItem<'exource/routes-config-handler-authority'>
-		| NamedPluginItem<'exource/routes-config-handler-navigator'>
-		| NamedPluginItem<'exource/vue-i18n'>
-		| NamedPluginItem<'exource/vue-router'>
+		| NamedPluginItem
 		| PluginItem
-		| [string | Plugin<any>, Record<string, any>]
-	)[] | Record<string, Record<string, any> | null | undefined>;
+		| [string | Plugin<any>, Record<string, any>?]
+		| string
+		| Plugin<any>
+	)[];
 }

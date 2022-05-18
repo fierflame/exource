@@ -10,16 +10,11 @@ import * as fsPromises from 'node:fs/promises';
 import getVersion from './getVersion';
 import initDataChannel from './initDataChannel';
 export type {
-	Api,
-	Logger,
-	ApiLogger,
-	ScanCallback,
-	ScanOptions,
-	Plugin,
-	Options,
-	Config,
-	ScanCfgCallback,
-	ScanCfgOptions,
+	Api, Logger, ApiLogger,
+	ScanCallback, ScanOptions,
+	ScanCfgCallback, ScanCfgOptions,
+	Plugin, Options,
+	NamedPluginItem, PluginItem, Config,
 } from './types';
 
 
