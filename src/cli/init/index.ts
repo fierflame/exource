@@ -2,16 +2,24 @@ import { logger } from 'exource';
 import glob from 'fast-glob';
 import * as fsPromises from 'node:fs/promises';
 const paths = [
+	`.exourcerc.js`,
+	`.exourcerc.mjs`,
+	`.exourcerc.yml`,
+	`.exourcerc.yaml`,
+	`.exourcerc.json`,
+	`.exourcerc.json5`,
 	`exource.config.js`,
 	`exource.config.mjs`,
 	`exource.config.yml`,
 	`exource.config.yaml`,
 	`exource.config.json`,
+	`exource.config.json5`,
 	`config/exource.js`,
 	`config/exource.mjs`,
 	`config/exource.yml`,
 	`config/exource.yaml`,
 	`config/exource.json`,
+	`config/exource.json5`,
 ]
 const defaultScript = `\
 /** @type {import("exource").Config} */
