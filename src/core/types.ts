@@ -37,7 +37,7 @@ export interface Api {
 
 	plugin(id: string, wait: true): Promise<void>;
 	plugin(id: string, wait?: false): boolean;
-	plugin<T extends Record<string, any>>(plugin: Plugin<T>, cfg?: Partial<T>): boolean;
+	plugin<T extends Record<string, any>>(plugin: Plugin<T>, cfg?: Partial<T>): Promise<boolean>;
 
 	getVersion(pkg: string): Promise<string>;
 
@@ -64,7 +64,7 @@ export interface ScanCfgCallback {
 	(paths: Record<string, any>, path: string, cfg: any, merge?: boolean): any;
 }
 export interface Plugin<T extends Record<string, any> = Record<string, any>> {
-	(api: Api, cfg: Partial<T>): void;
+	(api: Api, cfg: Partial<T>): void | PromiseLike<void>;
 	id?: string;
 	tag?: string;
 }

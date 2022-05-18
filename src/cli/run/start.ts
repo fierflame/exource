@@ -71,6 +71,6 @@ export default async function start(
 		watch,
 	})
 	for (const [p, c] of await parsePlugins(cwd, filepath, cfg.plugins)) {
-		api.plugin(p, c);
+		await api.plugin(p, c);
 	}
 }
