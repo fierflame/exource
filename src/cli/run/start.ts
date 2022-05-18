@@ -56,13 +56,12 @@ async function parsePlugins(
 }
 export default async function start(
 	filepath: string,
-	config: any,
+	cfg: any,
 	watch: boolean,
 ) {
-	const cfg = 'default' in config ? config.default : config;
 	const cwd = cfg?.cwd
 		? pathFn.resolve(filepath, '..', cfg.cwd)
-		: filepath.replace(/[\/\\](exource\.config|config[\/\\]exource)\.(m?js|ya?ml|json5?)$/g,'');
+		: filepath.replace(/[\/\\](package|\.exourcerc|exource\.config|config[\/\\]exource)\.(m?js|ya?ml|json5?)$/i,'');
 	const api = await exource({
 		cwd,
 		root: cfg.root,
