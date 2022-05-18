@@ -7,10 +7,8 @@ export interface Context {
 	root: string;
 	moduleDir: string;
 	outputRoot: string;
-	imports: Record<string | symbol, Record<string, string | boolean>>;
 	awaitPlugins: Map<string, Set<() => void>>;
 	plugins: Map<string, Plugin<any>>;
-	updateIndex(): any;
 	emit(pluginId: string | symbol, name: string | symbol, value: any): void
 	get(name: string | symbol): any[];
 	listen(name: string | symbol, get: true, listener: (...data: any[]) => any): () => void

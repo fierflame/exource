@@ -1,4 +1,3 @@
-import ignoreFn from './utils/ignoreFn';
 export * from './utils';
 import * as pathFn from 'node:path/posix'
 import type { Plugin, Options } from './types';
@@ -25,7 +24,6 @@ export default async function exource({
 	watch = false,
 	output = `${root}/_exource`
 }: Options = {}) {
-	const imports: Record<string | symbol, Record<string, boolean | string>> = {};
 	const plugins = new Map<string, Plugin>([['exource', () =>{}]]);
 	const awaitPlugins = new Map<string, Set<() => void>>();
 	const outputRoot = pathFn.resolve(cwd, output);
@@ -46,9 +44,11 @@ export default async function exource({
 			return`./${path}`;
 		},
 		getVersion: getVersion.bind(null, cwd),
-		imports, plugins, awaitPlugins,
-		updateIndex: ignoreFn(() => writeIndex(outputRoot, imports)),
+		plugins, awaitPlugins,
 	}
+	listen<string | string[] | Record<string, boolean | string>>('import', true, (...paths) => {
+		writeIndex(outputRoot, paths)
+	})
 	try {
 		await fsPromises.rm(outputRoot, {recursive: true});
 	} catch {

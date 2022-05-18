@@ -12,24 +12,6 @@ import scanCfg from './scanCfg';
 
 export type { Context } from './Context';
 
-function trans(path?: string | string[] | Record<string, boolean | string>) {
-	const paths: Record<string, boolean | string> = {};
-	if (!path) { return paths; }
-	if (Array.isArray(path)) {
-		for (const p of path) {
-			if (!p) { continue; }
-			if (typeof p !== 'string') { continue; }
-			paths[p] = false;
-		}
-		return paths;
-	}
-	for (const [p,v] of Object.entries(path)) {
-		if (!p) { continue; }
-		paths[p] = v && typeof v === 'string' || v === true ? v : false;
-	}
-	return paths;
-	
-}
 const version = '__VERSION__';
 export default function createApi(
 	context: Context,
@@ -37,10 +19,8 @@ export default function createApi(
 	tag: string = '',
 ): Api {
 	const pluginTag = tag || pluginId;
-	const s = pluginTag || Symbol();
+	const sym = pluginTag || Symbol();
 	const {
-		imports,
-		updateIndex,
 		cwd,
 		watch,
 		root,
@@ -60,11 +40,8 @@ export default function createApi(
 		getVersion,
 		version,
 
-		setImport(path?: string | string[] | Record<string, boolean | string>) {
-			imports[s] = trans(path)
-			updateIndex();
-		},
-		get, listen, emit: emit.bind(null, s) as Api['emit'],
+		setImport: emit.bind(null, sym, 'import'),
+		get, listen, emit: emit.bind(null, sym) as Api['emit'],
 		readCfg: readCfg.bind(null, cwd, pluginTag),
 		read: read.bind(null, cwd, pluginTag) as Api['read'],
 		write: write.bind(null, outputRoot, pluginTag),

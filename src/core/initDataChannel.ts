@@ -19,7 +19,7 @@ export default function initDataChannel() {
 		}
 	}
 
-	function emit(pluginId: string | symbol, name: string | symbol, value: any) {
+	function emit<T>(pluginId: string | symbol, name: string | symbol, value: T) {
 		if (value === undefined) {
 			let map = data.get(name);
 			if (!map?.has(pluginId)) { return; }
@@ -31,14 +31,14 @@ export default function initDataChannel() {
 		}
 		emitToListen(name);
 	}
-	function get(name: string) {
+	function get<T>(name: string) {
 		const map = data.get(name);
 		const value = map ? [...map.values()] : [];
-		return value;
+		return value as T[];
 	}
-	function listen(name: string, get: true, listener: (...data: any[]) => any): () => void
-	function listen(name: string, listener: (...data: any[]) => any): () => void
-	function listen(name: string, get: ((...data: any[]) => any) | true, listener?: (...data: any[]) => any): () => void {
+	function listen<T>(name: string, get: true, listener: (...data: T[]) => any): () => void
+	function listen<T>(name: string, listener: (...data: T[]) => any): () => void
+	function listen<T>(name: string, get: ((...data: T[]) => any) | true, listener?: (...data: T[]) => any): () => void {
 		const f = [get, listener].find(t => typeof t === 'function') as ((...data: any[]) => any | undefined);
 		if (!f) { return () => {}; }
 		function fn(...v: any[]) { f(...v) }
