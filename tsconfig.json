@@ -22,6 +22,7 @@
       "exource/routes-config-handler-navigator": ["./src/plugins/routes-config-handler-navigator"],
       "exource/vue-i18n": ["./src/plugins/vue-i18n"],
       "exource/vue-router": ["./src/plugins/vue-router"],
+      "exource/vue-routes": ["./src/plugins/vue-routes"],
     }
   },
   "include": ["src"]

@@ -16,6 +16,7 @@ const plugins = [
 	'routes-config-handler-authority',
 	'routes-config-handler-navigator',
 	'vue-router',
+	'vue-routes',
 	'vue-i18n',
 ];
 

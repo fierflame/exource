@@ -83,6 +83,7 @@ interface NamedPlugin {
 	'exource/routes-config-handler-navigator': typeof import('exource/routes-config-handler-navigator').default;
 	'exource/vue-i18n': typeof import('exource/vue-i18n').default;
 	'exource/vue-router': typeof import('exource/vue-router').default;
+	'exource/vue-routes': typeof import('exource/vue-routes').default;
 }
 export type NamedPluginItem = {
 	[K in keyof NamedPlugin]: [K, (NamedPlugin[K] extends Plugin<infer T> ? T : Record<string, any>)?]
