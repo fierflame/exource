@@ -2,7 +2,7 @@ import { Api } from 'exource';
 import { Handler } from 'exource/routes-config';
 
 export default async function handler(api: Api) {
-	api.emit<Handler>('routes-config-handler', (route, cfg, handlerApi) => {
+	api.emit<Handler>('handler:routes-config', (route, cfg, handlerApi) => {
 		handlerApi.ignore('authority');
 		const { authority } = cfg;
 	

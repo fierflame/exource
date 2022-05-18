@@ -32,12 +32,12 @@ export default async function router(api: Api, {
 	base, baseScript,
 }: Options) {
 	if (base) { baseScript = JSON.stringify(base); }
-	await api.write('vue-router/index.d.ts', indexType);
-	await api.write('vue-router/index.js', createIndex(baseScript));
-	api.setImport({'./vue-router': 'vueRouter'});
-	api.listen<string>('file:vue-routes', true, ignoreFn(path => {
-		const routesPath = path ? api.relativePath('./vue-router', path) : undefined;
-		return api.write('vue-router/index.js', createIndex(baseScript, routesPath));
+	await api.write('vue/router.d.ts', indexType);
+	await api.write('vue/router.js', createIndex(baseScript));
+	api.setImport({'./vue/router': 'vueRouter'});
+	api.listen<string>('file:vue/routes', true, ignoreFn(path => {
+		const routesPath = path ? api.relativePath('./vue', path) : undefined;
+		return api.write('vue/router.js', createIndex(baseScript, routesPath));
 	}));
 }
 router.id = 'exource/vue-router';

@@ -30,16 +30,16 @@ export default async function vueI18n(api: Api, {
 	languages?:string[],
 	storageKey?: string;
 }) {
-	await api.write('vue-i18n/messages.js', createMessages({}, languages));
-	await api.write('vue-i18n/messages.d.ts', messagesType);
-	await api.write('vue-i18n/index.js', createMain(storageKey, languages));
-	await api.write('vue-i18n/index.d.ts', indexType);
-	await api.write('vue-i18n/localeGetter.js', localeGetterScript);
-	await api.write('vue-i18n/localeGetter.d.ts', localeGetterType);
-	api.emit('localeGetter', 'vue-i18n/localeGetter');
-	api.setImport({'./vue-i18n': 'vueI18n'});
-	const writeMessages = ignoreFn(v => api.write('vue-i18n/messages.js', createMessages(v, languages)))
-	api.listen<Record<string, string>>('locales', true, (...data) => {
+	await api.write('vue/i18n/messages.js', createMessages({}, languages));
+	await api.write('vue/i18n/messages.d.ts', messagesType);
+	await api.write('vue/i18n/index.js', createMain(storageKey, languages));
+	await api.write('vue/i18n/index.d.ts', indexType);
+	await api.write('vue/i18n/localeGetter.js', localeGetterScript);
+	await api.write('vue/i18n/localeGetter.d.ts', localeGetterType);
+	api.emit('file:localeGetter', 'vue/i18n/localeGetter');
+	api.setImport({'./vue/i18n': 'vueI18n'});
+	const writeMessages = ignoreFn(v => api.write('vue/i18n/messages.js', createMessages(v, languages)))
+	api.listen<Record<string, string>>('files:locales', true, (...data) => {
 		if (!data.length) { return; }
 		writeMessages(Object.assign({}, ...data));
 	})

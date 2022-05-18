@@ -20,10 +20,10 @@ export default async function router(api: Api, {
 	componentProps, allMatchPath, lazy,
 	delay, timeout, errorComponent, loadingComponent,
 }: Options) {
-	await api.write('vue-router/routes.d.ts', routesType);
-	await api.write('vue-router/routes.js', 'export default []');
-	api.setImport({'./vue-router/routes': 'vueRoutes'});
-	api.emit('file:vue-routes', './vue-router/routes');
+	await api.write('vue/routes.d.ts', routesType);
+	await api.write('vue/routes.js', 'export default []');
+	api.setImport({'./vue/routes': 'vueRoutes'});
+	api.emit('file:vue/routes', './vue/routes');
 	const props = getComponentProps({
 		delay, timeout, errorComponent, loadingComponent,
 	}, componentProps, lazy);
@@ -31,12 +31,12 @@ export default async function router(api: Api, {
 		const matchPath = allMatchPath || getDefaultPath(await api.getVersion('vue-router'))
 		const isVue3 = parseInt(String(await api.getVersion('vue'))) === 3;
 		function getPath(path: string) {
-			return path[0] === '.' ? api.relativePath('vue-router', path, true) : path;
+			return path[0] === '.' ? api.relativePath('vue', path, true) : path;
 		}
 		const code = transform(getPath, list, matchPath, props, isVue3, lazy);
-		await api.write('vue-router/routes.js', code);
+		await api.write('vue/routes.js', code);
 	});
-	api.listen<Route | Route[]>('routes', true, (...data) => {
+	api.listen<Route | Route[]>('cfg:routes', true, (...data) => {
 		if (!data.length) { return; }
 		update(data.flat());
 	})

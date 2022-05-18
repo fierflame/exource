@@ -13,7 +13,7 @@ export default async function locale(api: Api, {
 	const files = new Map<string, Map<string, any>>();
 	const locales = new Set<string>();
 	function emit() {
-		api.emit('locales', Object.fromEntries([...locales].map(l => [l, `locales/${l}`])));
+		api.emit('files:locales', Object.fromEntries([...locales].map(l => [l, `locales/${l}`])));
 	}
 	const updateLocale = ignoreMapFn(async function updateLocale(name: string) {
 		const map = files.get(name);

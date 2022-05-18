@@ -104,7 +104,7 @@ export default function handler(api: Api, {
 	breadcrumbTypes?: string | string[];
 	breadcrumbLinkTypes?: string | string[];
 } = {}) {
-	api.emit<Handler>('routes-config-handler', (route, cfg, handlerApi) => {
+	api.emit<Handler>('handler:routes-config', (route, cfg, handlerApi) => {
 		handlerApi.ignore('icon', 'title', 'link', 'menu', 'breadcrumb', 'breadcrumbLink');
 		const menu = getEnum(menuTypes, cfg.menu);
 		const breadcrumb = getEnum(breadcrumbTypes, cfg.breadcrumb);

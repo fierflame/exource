@@ -38,7 +38,7 @@ export default async function routes(api: Api, {
 	main?: string;
 	imports?: string[] | Record<string, boolean>;
 } = {}) {
-	const handlers = api.get<Handler>('routes-config-handler');
+	const handlers = api.get<Handler>('handler:routes-config');
 	const imports = getImports(importList);
 	const filepath = path || `{${api.moduleDir}/*,${api.root}}/routes`
 	let updatedAll = false;
@@ -52,7 +52,7 @@ export default async function routes(api: Api, {
 			if (typeof cfg !== 'object') { continue; }
 			routeMap[path] = Array.isArray(cfg) ? {main: cfg} : cfg;
 		}
-		api.emit('routes', merge(
+		api.emit('cfg:routes', merge(
 			routeMap,
 			handlers,
 			main,
