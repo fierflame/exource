@@ -13,7 +13,7 @@ export default function(
 	for (const [k, file] of Object.entries(v)) {
 		if (langs && !langs.has(k)) { continue; }
 		const n = `l${imports.length}`;
-		imports.push(`import ${n} from ${JSON.stringify(`../${file}`)};`)
+		imports.push(`import ${n} from ${JSON.stringify(`../../${file}`)};`)
 		script.push(`	${JSON.stringify(k)}: {message: ${n}},`);
 	}
 	return [
