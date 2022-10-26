@@ -10,8 +10,8 @@ import getVersion from './getVersion';
 import initDataChannel from './initDataChannel';
 export type {
 	Api, Logger, ApiLogger,
-	ScanCallback, ScanOptions,
-	ScanCfgCallback, ScanCfgOptions,
+	ScanCallbackEvery, ScanCallbackAll, ScanOptions,
+	ScanCfgCallbackEvery, ScanCfgCallbackAll, ScanCfgOptions,
 	Plugin, Options,
 	NamedPluginItem, PluginItem, Config,
 } from './types';

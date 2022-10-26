@@ -1,5 +1,4 @@
 import type { Api } from 'exource';
-import { ignoreFn } from 'exource'
 import type { Handler } from './types';
 import merge from './merge';
 export type {
@@ -40,26 +39,23 @@ export default async function routes(api: Api, {
 } = {}) {
 	const handlers = api.get<Handler>('handler:routes-config');
 	const imports = getImports(importList);
-	const filepath = path || `{${api.moduleDir}/*,${api.root}}/routes`
-	let updatedAll = false;
-	api.scanCfg(filepath, ignoreFn((all, path, cfg, merged) => {
-		if (merged) {
-			if (updatedAll) { return; }
-			updatedAll = true;
-		}
-		const routeMap: Record<string, Record<string, any>> = Object.create(null);
-		for (const [path, cfg] of Object.entries(all)) {
-			if (typeof cfg !== 'object') { continue; }
-			routeMap[path] = Array.isArray(cfg) ? {main: cfg} : cfg;
-		}
-		api.emit('cfg:routes', merge(
-			routeMap,
-			handlers,
-			main,
-			imports,
-			e404 && typeof e404 === 'string' ? './'.includes(e404[0]) ? e404 :`./${e404}` : undefined,
-		));
-	}))
+	const filepath = path || `{${api.moduleDir}/*,${api.root}}/routes`;
+	const e404Path = e404 && typeof e404 === 'string'
+		? './'.includes(e404[0]) ? e404 :`./${e404}`
+		: undefined
+	function handle(cfg: any) {
+		if (typeof cfg !== 'object') { return; }
+		return Array.isArray(cfg) ? {main: cfg} : cfg;
+	}
+	function update(routes: Record<string, any>) {
+		api.emit('cfg:routes', merge(routes, handlers, main, imports, e404Path));
+	}
+	api.scanCfg(
+		filepath,
+		{handle},
+		(_path, _cfg, all) => update(all),
+		all => update(all),
+	);
 }
 
 routes.id = 'exource/routes-config';

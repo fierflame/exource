@@ -19,7 +19,7 @@ async function readAllCfg(
 		} catch {
 			continue;
 		}
-		if (!cfg) { cfg; }
+		if (!cfg) { continue; }
 		modules[path] = cfg;
 	}
 	return modules;

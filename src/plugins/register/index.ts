@@ -1,5 +1,5 @@
 import type { Api } from 'exource';
-import {ignoreFn, ignoreMapFn, onceFn} from 'exource';
+import {ignoreFn, ignoreMapFn} from 'exource';
 import getMap from './getMap';
 import getRegisterKey from './getRegisterKey';
 import getRegisterName from './getRegisterName';
@@ -95,12 +95,14 @@ export default async function register(api: Api, {
 		})
 		function scanFile(file: string) {
 			const dir = joinPath(dirPath, `${register}/*/${file}{,/index}.{ts,tsx,js,jsx,vue}`)
-			return api.scan(dir, (paths, path, unlink, merge) => {
-				if (merge) { updateAllFile(file, paths); } else { updateFile(path, unlink); }
-			});
+			return api.scan(
+				dir,
+				(path, unlink) => updateFile(path, unlink),
+				paths => updateAllFile(file, paths),
+			);
 
 		}
-		const updateAllConfig = onceFn((paths: Record<string, any>) => {
+		const updateAllConfig = (paths: Record<string, any>) => {
 			for (const [path, cfg] of Object.entries(paths)) {
 				const keyInfo = getRegisterKey(path);
 				if (!keyInfo) { return; }
@@ -110,12 +112,10 @@ export default async function register(api: Api, {
 			for (const key of configs.keys()) {
 				generateKeyFile(key);
 			}
-		})
+		};
 		function scanConfig() {
 			const file = joinPath(dirPath, `${register}/*/config`)
-			return api.scanCfg(file, (all, path, cfg, merged) => {
-				if (merged) { updateAllConfig(all); return}
-
+			return api.scanCfg(file, (path, cfg) => {
 				const keyInfo = getRegisterKey(path);
 				if (!keyInfo) { return; }
 				const [key] = keyInfo;
@@ -128,7 +128,7 @@ export default async function register(api: Api, {
 					getMap(configs, key, () => new Map).set(path, cfg);
 				}
 				generateKeyFile(key);
-			});
+			}, paths => updateAllConfig(paths));
 		}
 		return ignoreFn(async () => {
 			const d = getRegisterDefines(register);
@@ -168,7 +168,7 @@ export default async function register(api: Api, {
 		}
 		await run();
 	});
-	const updateAll = onceFn((all: Record<string, any>) => {
+	const updateAll = (all: Record<string, any>) => {
 		const registers = new Set<string>();
 		for (const [path, cfg] of Object.entries(all)) {
 			const register = getRegisterName(path);
@@ -180,12 +180,11 @@ export default async function register(api: Api, {
 		for (const register of registers) {
 			update(register);
 		}
-	})
+	};
 	api.listen<string>('file:localeGetter', true, ignoreFn(v => writeLocale(api, v)));
 	await writeFilter(api);
 	
-	api.scanCfg(joinPath(dirPath, '*'), (all, path, cfg, merged) => {
-		if (merged) { updateAll(all); return; }
+	api.scanCfg(joinPath(dirPath, '*'), (path, cfg) => {
 		const register = getRegisterName(path);
 		if (!register) { return; }
 		const registerDefines = getRegisterDefines(register);
@@ -196,7 +195,7 @@ export default async function register(api: Api, {
 			registerDefines.set(path, cfg);
 		}
 		update(register);
-	})
+	}, all => updateAll(all))
 }
 
 register.id = 'exource/register';

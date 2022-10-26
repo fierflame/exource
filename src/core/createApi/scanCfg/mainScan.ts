@@ -1,5 +1,5 @@
 import * as chokidar from 'chokidar';
-import type { ScanCfgCallback, ScanCfgOptions } from '../../types';
+import type { ScanCfgCallbackEvery, ScanCfgOptions } from '../../types';
 import { ignoreMapFn } from '../../utils';
 import readCfg from '../readCfg';
 
@@ -8,7 +8,7 @@ export default function mainScan(
 	plugin: string,
 	path: string | string[],
 	{handle}: ScanCfgOptions,
-	cb: ScanCfgCallback,
+	cb: ScanCfgCallbackEvery,
 ) {
 	const modules: Record<string, any> = {};
 	const update = ignoreMapFn(async (path: string, unlink?: boolean) => {
@@ -22,10 +22,10 @@ export default function mainScan(
 		}
 		if (cfg) {
 			modules[path] = cfg;
-			cb({...modules}, path, cfg)
+			cb(path, cfg, {...modules})
 		} else if (path in modules) {
 			delete modules[path];
-			cb({...modules}, path, null);
+			cb(path, null, {...modules});
 		}
 	})
 	const watcher = chokidar.watch(path, { cwd });

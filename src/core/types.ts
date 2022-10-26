@@ -24,14 +24,31 @@ export interface Api {
 	scan(
 		path: string | string[],
 		opt: ScanOptions,
-		cb: ScanCallback,
+		cbEvery: ScanCallbackEvery,
+		cbAll?: ScanCallbackAll,
 	): () => void;
-	scan(path: string | string[], cb: ScanCallback): () => void;
+	scan(
+		path: string | string[],
+		cbEvery: ScanCallbackEvery,
+		cbAll?: ScanCallbackAll,
+	): () => void;
 	scan(path: string | string[]): Promise<string[]>;
 
-	scanCfg(path: string | string[], opt: ScanCfgOptions, cb: ScanCfgCallback): () => void;
-	scanCfg(path: string | string[], cb: ScanCfgCallback): () => void;
-	scanCfg(path: string | string[], opt?: ScanCfgOptions): Promise<Record<string, any>>;
+	scanCfg(
+		path: string | string[], 
+		opt: ScanCfgOptions, 
+		cbEvery: ScanCfgCallbackEvery,
+		cbAll?: ScanCfgCallbackAll,
+	): () => void;
+	scanCfg(
+		path: string | string[], 
+		cbEvery: ScanCfgCallbackEvery,
+		cbAll?: ScanCfgCallbackAll,
+	): () => void;
+	scanCfg(
+		path: string | string[], 
+		opt?: ScanCfgOptions,
+	): Promise<Record<string, any>>;
 
 	logger: ApiLogger;
 
@@ -54,14 +71,20 @@ export interface Api {
 export interface ScanOptions {
 	changed?: boolean;
 }
-export interface ScanCallback {
-	(paths: string[], path: string, unlink?: boolean, merge?: boolean): any;
+export interface ScanCallbackEvery {
+	(path: string, unlink: boolean, paths: string[]): any;
+}
+export interface ScanCallbackAll {
+	(paths: string[]): any;
 }
 export interface ScanCfgOptions {
 	handle?(v: any, path: string): any
 }
-export interface ScanCfgCallback {
-	(paths: Record<string, any>, path: string, cfg: any, merge?: boolean): any;
+export interface ScanCfgCallbackEvery {
+	(path: string, cfg: any, paths: Record<string, any>): any;
+}
+export interface ScanCfgCallbackAll {
+	(paths: Record<string, any>): any;
 }
 export interface Plugin<T extends Record<string, any> = Record<string, any>> {
 	(api: Api, cfg: Partial<T>): void | PromiseLike<void>;

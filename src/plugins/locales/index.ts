@@ -5,6 +5,16 @@ declare const value: Record<string, any>;
 export default value;
 `
 
+function getName(path: string) {
+	const paths = path.split(/\/locales\//);
+	if (path.length < 2) { return; }
+	const p = (paths.pop() || '').replace(/\.(json5?|ya?ml)$/, '').split('/');
+	const r = regex.exec(p[0]) ||regex.exec(p[p.length - 1]);
+	if (!r) { return; }
+	const name = r[2] ? `${r[1]}-${r[2]}` : r[1];
+	return name;
+}
+
 const regex = /^([a-z]{2})(?:[-_]?([A-Z]{2,3}))?$/;
 export default async function locale(api: Api, {
 }: {
@@ -15,7 +25,7 @@ export default async function locale(api: Api, {
 	function emit() {
 		api.emit('files:locales', Object.fromEntries([...locales].map(l => [l, `locales/${l}`])));
 	}
-	const updateLocale = ignoreMapFn(async function updateLocale(name: string) {
+	const updateLocale = ignoreMapFn(async (name: string) => {
 		const map = files.get(name);
 		if (!map) {
 			if (!locales.delete(name)) { return; }
@@ -49,26 +59,38 @@ export default async function locale(api: Api, {
 		emit();
 	})
 
-	api.scanCfg(filepath, (_, path, locale) => {
-		const paths = path.split(/\/locales\//);
-		if (path.length < 2) { return; }
-		const p = (paths.pop() || '').replace(/\.(json5?|ya?ml)$/, '').split('/');
-		const r = regex.exec(p[0]) ||regex.exec(p[p.length - 1]);
-		if (!r) { return; }
-		const name = r[2] ? `${r[1]}-${r[2]}` : r[1];
-		if (locale && !Array.isArray(locale) && typeof locale === 'object') {
-			let map = files.get(name);
-			if (!map) {
-				map = new Map();
-				files.set(name, map);
-			}
-			map.set(path, locale);
-		} else {
-			let map = files.get(name);
-			if (!map) { return; }
-			if (!map.delete(name)) { return; }
+	function addLocale(path: string, locale: object) {
+		const name = getName(path);
+		if (!name) { return; }
+		let map = files.get(name);
+		if (!map) {
+			map = new Map();
+			files.set(name, map);
 		}
-		updateLocale(name);
+		map.set(path, locale);
+		return name;
+	}
+	function removeLocale(path: string) {
+		const name = getName(path);
+		if (!name) { return; }
+		const map = files.get(name);
+		if (!map) { return; }
+		if (!map.delete(path)) { return; }
+		return name
+	}
+	api.scanCfg(filepath, (path, locale) => {
+		const is = locale && !Array.isArray(locale) && typeof locale === 'object'
+		const name = is ? addLocale(path, locale) : removeLocale(path)
+		if (name) { updateLocale(name); }
+	}, (locales) => {
+		for (const [path, locale] of Object.entries(locales)) {
+			if (locale && !Array.isArray(locale) && typeof locale === 'object') {
+				addLocale(path, locale);
+			}
+		}
+		for (const name of files.keys()) {
+			updateLocale(name);
+		}
 	})
 }
 locale.id = 'exource/locales';
